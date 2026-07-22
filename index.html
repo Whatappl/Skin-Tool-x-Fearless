@@ -389,12 +389,12 @@
                     1️⃣ Join Main WhatsApp Channel
                 </button>
 
-                <!-- Step 2 (Initially Disabled) -->
+                <!-- Step 2 -->
                 <button class="btn-step btn-step-2 btn-disabled" id="step2Btn" onclick="handleStep2()">
                     🔒 2️⃣ Join Backup WhatsApp Channel
                 </button>
 
-                <!-- Step 3 (Initially Disabled) -->
+                <!-- Step 3 -->
                 <button class="btn-step btn-step-3 btn-disabled" id="step3Btn" onclick="handleStep3()">
                     🔒 3️⃣ Share on WhatsApp (0 / 5)
                 </button>
@@ -448,7 +448,7 @@
 
     </div>
 
-    <!-- JavaScript Logic for Sequential Steps -->
+    <!-- JavaScript Logic -->
     <script>
         const mainChannelUrl = "https://whatsapp.com/channel/0029VbDIkfX3GJOotlw08M3E";
         const backupChannelUrl = "https://whatsapp.com/channel/0029VbD11EtAYlUQxZMuK045";
@@ -457,70 +457,56 @@
         let currentStep = 1;
         let shareCount = 0;
         const requiredShares = 5;
+        let pendingAction = null;
 
-        let activeAction = null; 
-        let actionStartTime = 0;
-
-        // Step 1: Join Main Channel
         function handleStep1() {
             if (currentStep !== 1) return;
-            activeAction = 'step1';
-            actionStartTime = Date.now();
+            pendingAction = 'step1';
+            document.getElementById('noticeMsg').innerText = "";
             window.open(mainChannelUrl, '_blank');
         }
 
-        // Step 2: Join Backup Channel
         function handleStep2() {
             if (currentStep !== 2) return;
-            activeAction = 'step2';
-            actionStartTime = Date.now();
+            pendingAction = 'step2';
+            document.getElementById('noticeMsg').innerText = "";
             window.open(backupChannelUrl, '_blank');
         }
 
-        // Step 3: WhatsApp Share
         function handleStep3() {
             if (currentStep !== 3 || shareCount >= requiredShares) return;
-            activeAction = 'share';
-            actionStartTime = Date.now();
+            pendingAction = 'share';
             document.getElementById('noticeMsg').innerText = "";
 
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
             window.open(whatsappUrl, '_blank');
         }
 
-        // Return from action detection
-        window.addEventListener('focus', function() {
-            if (!activeAction) return;
+        // Process step advancement when returning to the page
+        function checkReturnAction() {
+            if (!pendingAction) return;
 
-            const elapsedTime = (Date.now() - actionStartTime) / 1000;
+            if (pendingAction === 'step1') {
+                currentStep = 2;
+                pendingAction = null;
+                updateUI();
+            } 
+            else if (pendingAction === 'step2') {
+                currentStep = 3;
+                pendingAction = null;
+                updateUI();
+            } 
+            else if (pendingAction === 'share') {
+                pendingAction = null;
+                shareCount++;
+                updateUI();
+            }
+        }
 
-            if (activeAction === 'step1') {
-                if (elapsedTime >= 3) {
-                    currentStep = 2;
-                    activeAction = null;
-                    updateUI();
-                } else {
-                    document.getElementById('noticeMsg').innerText = "⚠️ Please join the Main Channel first!";
-                }
-            } 
-            else if (activeAction === 'step2') {
-                if (elapsedTime >= 3) {
-                    currentStep = 3;
-                    activeAction = null;
-                    updateUI();
-                } else {
-                    document.getElementById('noticeMsg').innerText = "⚠️ Please join the Backup Channel first!";
-                }
-            } 
-            else if (activeAction === 'share') {
-                activeAction = null;
-                if (elapsedTime < 4) {
-                    document.getElementById('noticeMsg').innerText = "⚠️ You came back too fast! Please share in a group and wait 4 seconds.";
-                } else {
-                    shareCount++;
-                    document.getElementById('noticeMsg').innerText = "";
-                    updateUI();
-                }
+        window.addEventListener('focus', checkReturnAction);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkReturnAction();
             }
         });
 
