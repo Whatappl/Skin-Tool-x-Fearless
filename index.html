@@ -13,6 +13,7 @@
             --text-color: #ffffff;
             --text-muted: #a0aab2;
             --success-green: #00e676;
+            --danger-red: #ff4d4d;
         }
 
         * {
@@ -144,6 +145,58 @@
             font-size: 1.3rem;
         }
 
+        /* Anti-Scam Notice Section */
+        .scam-alert-card {
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid var(--danger-red);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.25);
+        }
+
+        .scam-title {
+            color: var(--danger-red);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scam-text {
+            font-size: 0.88rem;
+            color: var(--text-color);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .scam-number {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        .report-steps {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: left;
+        }
+
+        .report-steps ol {
+            margin-left: 18px;
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .report-steps strong {
+            color: #fff;
+        }
+
         /* Appreciation Section */
         .appreciation-section {
             margin-top: 15px;
@@ -218,7 +271,12 @@
             color: #fff;
         }
 
-        .btn-step-3 {
+        .btn-step-danger {
+            background: linear-gradient(135deg, #ff4d4d, #c0392b);
+            color: #fff;
+        }
+
+        .btn-step-share {
             background: linear-gradient(135deg, #25D366, #128C7E);
             color: #fff;
         }
@@ -378,10 +436,29 @@
             </div>
         </div>
 
+        <!-- Anti-Scam Alert Card -->
+        <div class="scam-alert-card">
+            <h3 class="scam-title">⚠️ SCAMMER WARNING</h3>
+            <p class="scam-text">
+                All files on Fearless Xits are <strong>100% FREE</strong>! Do not buy files from scammers selling our content.
+                Beware of fake sellers using <span class="scam-number">+234 701 417 4959</span>.
+            </p>
+            
+            <div class="report-steps">
+                <strong>How to Report & Block Scammers on WhatsApp:</strong>
+                <ol>
+                    <li>Click Step 3 below to open direct DM chat with the scammer.</li>
+                    <li>Tap the <strong>3 dots (Menu)</strong> or Contact Profile at the top right.</li>
+                    <li>Select <strong>More</strong> ➔ Tap <strong>Report Contact</strong>.</li>
+                    <li>Check <em>"Block contact and delete chat"</em> and confirm.</li>
+                </ol>
+            </div>
+        </div>
+
         <!-- Multi-Step Unlock Card -->
         <div class="unlock-card" id="unlockCard">
             <h3 class="unlock-title">🔒 Unlock Setup & Download Files</h3>
-            <p class="unlock-desc">Complete all 3 steps below to unlock the file download links.</p>
+            <p class="unlock-desc">Complete all steps below to unlock the download buttons.</p>
 
             <div class="steps-container">
                 <!-- Step 1 -->
@@ -394,9 +471,14 @@
                     🔒 2️⃣ Join Backup WhatsApp Channel
                 </button>
 
-                <!-- Step 3 -->
-                <button class="btn-step btn-step-3 btn-disabled" id="step3Btn" onclick="handleStep3()">
-                    🔒 3️⃣ Share on WhatsApp (0 / 5)
+                <!-- Step 3: Direct DM Report Scammer -->
+                <button class="btn-step btn-step-danger btn-disabled" id="step3Btn" onclick="handleStep3()">
+                    🔒 3️⃣ Open Scammer DM to Report & Block (+234 701 417 4959)
+                </button>
+
+                <!-- Step 4: Share -->
+                <button class="btn-step btn-step-share btn-disabled" id="step4Btn" onclick="handleStep4()">
+                    🔒 4️⃣ Share on WhatsApp (0 / 5)
                 </button>
             </div>
 
@@ -452,6 +534,7 @@
     <script>
         const mainChannelUrl = "https://whatsapp.com/channel/0029VbDIkfX3GJOotlw08M3E";
         const backupChannelUrl = "https://whatsapp.com/channel/0029VbD11EtAYlUQxZMuK045";
+        const scammerDmUrl = "https://wa.me/2347014174959";
         const shareText = `*GLITCH TOOL PACK SAFE FOR MAIN ID 📲(ios and droid)*\n\n*File Link :* https://skintoolxfearless.netlify.app\n\n*Fearless Xits Channel For Free File + Aim Sensi 🎯*\nhttps://whatsapp.com/channel/0029VbDIkfX3GJOotlw08M3E`;
 
         let currentStep = 1;
@@ -474,7 +557,15 @@
         }
 
         function handleStep3() {
-            if (currentStep !== 3 || shareCount >= requiredShares) return;
+            if (currentStep !== 3) return;
+            pendingAction = 'step3';
+            document.getElementById('noticeMsg').innerText = "";
+            // Directs user to the DM chat with the scammer number
+            window.open(scammerDmUrl, '_blank');
+        }
+
+        function handleStep4() {
+            if (currentStep !== 4 || shareCount >= requiredShares) return;
             pendingAction = 'share';
             document.getElementById('noticeMsg').innerText = "";
 
@@ -482,7 +573,6 @@
             window.open(whatsappUrl, '_blank');
         }
 
-        // Process step advancement when returning to the page
         function checkReturnAction() {
             if (!pendingAction) return;
 
@@ -496,6 +586,11 @@
                 pendingAction = null;
                 updateUI();
             } 
+            else if (pendingAction === 'step3') {
+                currentStep = 4;
+                pendingAction = null;
+                updateUI();
+            }
             else if (pendingAction === 'share') {
                 pendingAction = null;
                 shareCount++;
@@ -514,6 +609,7 @@
             const step1Btn = document.getElementById('step1Btn');
             const step2Btn = document.getElementById('step2Btn');
             const step3Btn = document.getElementById('step3Btn');
+            const step4Btn = document.getElementById('step4Btn');
             const progressBar = document.getElementById('progressBar');
             const counterStatus = document.getElementById('counterStatus');
 
@@ -528,7 +624,7 @@
                 step2Btn.classList.remove('btn-disabled');
                 step2Btn.innerHTML = "2️⃣ Join Backup WhatsApp Channel";
 
-                progressBar.style.width = "25%";
+                progressBar.style.width = "20%";
                 counterStatus.innerText = "Step 2: Join Backup Channel";
             } 
             else if (currentStep === 3) {
@@ -536,13 +632,23 @@
                 step2Btn.classList.add('btn-disabled');
 
                 step3Btn.classList.remove('btn-disabled');
+                step3Btn.innerHTML = "3️⃣ Open Scammer DM to Report & Block (+234 701 417 4959)";
+
+                progressBar.style.width = "40%";
+                counterStatus.innerText = "Step 3: Open Scammer DM to Report & Block";
+            }
+            else if (currentStep === 4) {
+                step3Btn.innerHTML = "✅ Reported & Blocked Scammer";
+                step3Btn.classList.add('btn-disabled');
+
+                step4Btn.classList.remove('btn-disabled');
                 
-                const progressPercentage = 25 + ((shareCount / requiredShares) * 75);
+                const progressPercentage = 40 + ((shareCount / requiredShares) * 60);
                 progressBar.style.width = progressPercentage + "%";
 
                 if (shareCount < requiredShares) {
-                    step3Btn.innerHTML = `📲 Share on WhatsApp (${shareCount} / ${requiredShares})`;
-                    counterStatus.innerText = `Step 3: Share to 5 Groups (${shareCount} / ${requiredShares})`;
+                    step4Btn.innerHTML = `📲 Share on WhatsApp (${shareCount} / ${requiredShares})`;
+                    counterStatus.innerText = `Step 4: Share to 5 Groups (${shareCount} / ${requiredShares})`;
                 } else {
                     unlockFiles();
                 }
@@ -553,8 +659,8 @@
             document.getElementById('counterStatus').innerText = "🎉 All Downloads Unlocked!";
             document.getElementById('counterStatus').style.color = "var(--success-green)";
             document.getElementById('noticeMsg').innerText = "";
-            document.getElementById('step3Btn').innerHTML = "✅ Shares Completed!";
-            document.getElementById('step3Btn').classList.add('btn-disabled');
+            document.getElementById('step4Btn').innerHTML = "✅ Shares Completed!";
+            document.getElementById('step4Btn').classList.add('btn-disabled');
 
             const lockedBtns = document.querySelectorAll('.btn-locked');
             lockedBtns.forEach(btn => {
